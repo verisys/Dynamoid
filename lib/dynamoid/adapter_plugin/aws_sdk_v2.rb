@@ -304,7 +304,8 @@ module Dynamoid
                   :scan_index_forward,
                   :limit,
                   :select,
-                  :index_name
+                  :index_name,
+                  :projection_expression
                 )
 
         opts.delete(:consistent_read)

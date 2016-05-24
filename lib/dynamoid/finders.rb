@@ -157,6 +157,7 @@ module Dynamoid
 
         opts[:select] = options[:select] if options[:select].present?
         opts[:batch_size] = options[:batch_size] if options[:batch_size].present?
+        opts[:projection_expression] = options[:projection_expression] if options[:select] == 'SPECIFIC_ATTRIBUTES'
 
         if range_key_field
           opts[:range_key] = range_key_field

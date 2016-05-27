@@ -347,21 +347,39 @@ module Dynamoid
         q[:key_conditions] = key_conditions
         q[:limit] = batch || limit if batch || limit
 
-        Enumerator.new { |y|
-          # Batch loop, pulls multiple requests until done using the start_key
+        if q[:select] == "COUNT"
+          count = 0
           loop do
             results = client.query(q)
 
-            results.data[:items].each { |row| y << result_item_to_hash(row) }
+            count += results.data[:count]
 
             if((lk = results[:last_evaluated_key]) && batch)
               q[:exclusive_start_key] = lk
             else
+              count
               break
             end
           end
 
-        }
+          count
+        else
+          Enumerator.new { |y|
+            # Batch loop, pulls multiple requests until done using the start_key
+            loop do
+              results = client.query(q)
+
+              results.data[:items].each { |row| y << result_item_to_hash(row) }
+
+              if((lk = results[:last_evaluated_key]) && batch)
+                q[:exclusive_start_key] = lk
+              else
+                break
+              end
+            end
+          }
+        end
+
       end
 
       EQ = "EQ".freeze

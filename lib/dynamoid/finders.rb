@@ -163,9 +163,15 @@ module Dynamoid
           opts[:range_key] = range_key_field
           opts[range_op_mapped] = range_key_value
         end
-        Dynamoid.adapter.query(self.table_name, opts).map do |item|
-          from_database(item)
+
+        if opts[:select] == 'COUNT'
+          Dynamoid.adapter.query(self.table_name, opts)
+        else
+          Dynamoid.adapter.query(self.table_name, opts).map do |item|
+            from_database(item)
+          end
         end
+        
       end
 
       # Find using exciting method_missing finders attributes. Uses criteria chains under the hood to accomplish this neatness.

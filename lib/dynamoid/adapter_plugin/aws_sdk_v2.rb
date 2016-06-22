@@ -350,7 +350,12 @@ module Dynamoid
         if q[:select] == "COUNT"
           count = 0
           loop do
-            results = client.query(q)
+            begin
+              results = client.query(q)
+            rescue Aws::DynamoDB::Errors::ProvisionedThroughputExceededException
+              sleep 0.5
+              retry
+            end
 
             count += results.data[:count]
 
@@ -367,7 +372,12 @@ module Dynamoid
           Enumerator.new { |y|
             # Batch loop, pulls multiple requests until done using the start_key
             loop do
-              results = client.query(q)
+              begin
+                results = client.query(q)
+              rescue Aws::DynamoDB::Errors::ProvisionedThroughputExceededException
+                sleep 0.5
+                retry
+              end
 
               results.data[:items].each { |row| y << result_item_to_hash(row) }
 
